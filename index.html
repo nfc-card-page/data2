@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سایت مدیریت - مشاهده اطلاعات و برنامه غذایی</title>
+    <title>سایت مدیریت </title>
     <style>
         * {
             margin: 0;
@@ -246,39 +246,11 @@
             display: none;
         }
         
-        .site-links {
-            background: #e9ecef;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-        }
-        
-        .site-links h3 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-        
-        .site-links input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            margin-bottom: 0.5rem;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>سایت مدیریت - مشاهده اطلاعات و برنامه غذایی</h1>
-        
-        <!-- تنظیمات سایت -->
-        <div class="site-links">
-            <h3>تنظیمات سایت</h3>
-            <label>آدرس سایت اصلی:</label>
-            <input type="text" id="mainSiteUrl" value="https://nfc-card-page.github.io/Nutrition-plan/" readonly>
-            <label>آدرس سایت مدیریت (فعلی):</label>
-            <input type="text" id="adminSiteUrl" value="https://nfc-card-page.github.io/data2/" readonly>
-        </div>
+        <h1>سایت مدیریت </h1>
         
         <!-- بخش رمز عبور -->
         <div class="password-section">
@@ -377,232 +349,200 @@
     </div>
 
     <script>
-        // تنظیمات اولیه
-        const ADMIN_PASSWORD = '1234'; // رمز ثابت - غیرقابل تغییر
-        let selectedUser = null;
-        
-        // بررسی رمز عبور
-        function checkPassword() {
-            const inputPassword = document.getElementById('passwordInput').value;
-            if (inputPassword === ADMIN_PASSWORD) {
-                document.getElementById('mainContent').classList.remove('hidden');
-                document.querySelector('.password-section').classList.add('hidden');
-                loadUsers();
-            } else {
-                alert('رمز عبور اشتباه است');
-            }
-        }
-        
-        // تغییر رمز عبور - غیرفعال شده
-        function changePassword() {
-            alert('رمز عبور قابل تغییر نیست');
-        }
-        
-        // بارگذاری کاربران
-        function loadUsers() {
-            const users = JSON.parse(localStorage.getItem('adminData') || '[]');
+        (function(){
+            var _0x1a2b=['MTQ5MQ==','adminData','users','adminDietPlans','dietPlan_','getItem','setItem','JSON','parse','stringify','filter','removeItem','keys','startsWith','forEach','length','innerHTML','textContent','style','display','classList','add','remove','contains','hidden','value','getElementById','querySelectorAll','addEventListener','preventDefault','FormData','get','push','find','map','join','alert','confirm','prompt','setTimeout','setInterval','console','log'];
+            var _0x2c3d=function(a,b){return _0x1a2b[a-b];};
             
-            // آپدیت آمار
-            document.getElementById('totalUsers').textContent = users.length;
-            document.getElementById('maleUsers').textContent = users.filter(u => u.gender === 'male').length;
-            document.getElementById('femaleUsers').textContent = users.filter(u => u.gender === 'female').length;
+            var ADMIN_PASSWORD = atob(_0x2c3d(0,0));
+            var selectedUser = null;
             
-            const tbody = document.getElementById('usersTableBody');
-            const noData = document.getElementById('noData');
-            
-            if (users.length === 0) {
-                document.getElementById('usersTable').style.display = 'none';
-                noData.style.display = 'block';
-                return;
-            }
-            
-            document.getElementById('usersTable').style.display = 'block';
-            noData.style.display = 'none';
-            
-            tbody.innerHTML = users.map((user, index) => `
-                <tr>
-                    <td>${user.username}</td>
-                    <td>${user.age}</td>
-                    <td>${user.gender === 'male' ? 'مرد' : 'زن'}</td>
-                    <td>${user.height}</td>
-                    <td>${user.weight}</td>
-                    <td>${new Date(user.timestamp).toLocaleDateString('fa-IR')}</td>
-                    <td>
-                        <button class="btn btn-primary" onclick="selectUser('${user.username}')">
-                            انتخاب برای برنامه غذایی
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        // انتخاب کاربر برای برنامه غذایی
-        function selectUser(username) {
-            const users = JSON.parse(localStorage.getItem('adminData') || '[]');
-            selectedUser = users.find(u => u.username === username);
-            
-            if (selectedUser) {
-                document.getElementById('selectedUserInfo').classList.remove('hidden');
-                document.getElementById('userInfoContent').innerHTML = `
-                    <p><strong>نام کاربری:</strong> ${selectedUser.username}</p>
-                    <p><strong>سن:</strong> ${selectedUser.age} سال</p>
-                    <p><strong>جنسیت:</strong> ${selectedUser.gender === 'male' ? 'مرد' : 'زن'}</p>
-                    <p><strong>قد:</strong> ${selectedUser.height} سانتی متر</p>
-                    <p><strong>وزن:</strong> ${selectedUser.weight} کیلوگرم</p>
-                `;
-                
-                // بارگذاری برنامه موجود
-                loadExistingPlan();
-            }
-        }
-        
-        // افزودن مورد جدید برنامه غذایی
-        function addDietItem() {
-            const dietItems = document.getElementById('dietItems');
-            const newItem = document.createElement('div');
-            newItem.className = 'diet-item';
-            newItem.innerHTML = `
-                <div class="form-group">
-                    <label>عنوان برنامه:</label>
-                    <input type="text" name="title" placeholder="مثال: ناهار" required>
-                </div>
-                <div class="form-group">
-                    <label>توضیحات:</label>
-                    <textarea name="description" placeholder="مثال: برنج، مرغ، سالاد" required></textarea>
-                </div>
-                <button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>
-            `;
-            dietItems.appendChild(newItem);
-        }
-        
-        // حذف مورد برنامه غذایی
-        function removeDietItem(button) {
-            const dietItems = document.getElementById('dietItems');
-            if (dietItems.children.length > 1) {
-                button.parentElement.remove();
-            } else {
-                alert('حداقل یک مورد باید وجود داشته باشد');
-            }
-        }
-        
-        // بارگذاری برنامه موجود
-        function loadExistingPlan() {
-            if (!selectedUser) return;
-            
-            const dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
-            const dietPlan = dietPlans[selectedUser.username];
-            
-            if (dietPlan && dietPlan.length > 0) {
-                const dietItems = document.getElementById('dietItems');
-                dietItems.innerHTML = '';
-                
-                dietPlan.forEach((item, index) => {
-                    const newItem = document.createElement('div');
-                    newItem.className = 'diet-item';
-                    newItem.innerHTML = `
-                        <div class="form-group">
-                            <label>عنوان برنامه:</label>
-                            <input type="text" name="title" value="${item.title}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>توضیحات:</label>
-                            <textarea name="description" required>${item.description}</textarea>
-                        </div>
-                        <button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>
-                    `;
-                    dietItems.appendChild(newItem);
-                });
-            }
-        }
-        
-        // ذخیره برنامه غذایی
-        document.getElementById('dietForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (!selectedUser) {
-                alert('لطفاً ابتدا یک کاربر انتخاب کنید');
-                return;
-            }
-            
-            const dietItems = [];
-            const items = document.querySelectorAll('.diet-item');
-            items.forEach(item => {
-                const title = item.querySelector('input[name="title"]').value;
-                const description = item.querySelector('textarea[name="description"]').value;
-                if (title && description) {
-                    dietItems.push({ title, description });
+            function checkPassword() {
+                var inputPassword = document.getElementById('passwordInput').value;
+                if (inputPassword === ADMIN_PASSWORD) {
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    document.querySelector('.password-section').classList.add('hidden');
+                    loadUsers();
+                } else {
+                    alert('رمز عبور اشتباه است');
                 }
+            }
+            
+            function loadUsers() {
+                var users = JSON.parse(localStorage.getItem('adminData') || '[]');
+                
+                document.getElementById('totalUsers').textContent = users.length;
+                document.getElementById('maleUsers').textContent = users.filter(function(u) { return u.gender === 'male'; }).length;
+                document.getElementById('femaleUsers').textContent = users.filter(function(u) { return u.gender === 'female'; }).length;
+                
+                var tbody = document.getElementById('usersTableBody');
+                var noData = document.getElementById('noData');
+                
+                if (users.length === 0) {
+                    document.getElementById('usersTable').style.display = 'none';
+                    noData.style.display = 'block';
+                    return;
+                }
+                
+                document.getElementById('usersTable').style.display = 'block';
+                noData.style.display = 'none';
+                
+                tbody.innerHTML = users.map(function(user, index) {
+                    return '<tr><td>' + user.username + '</td><td>' + user.age + '</td><td>' + (user.gender === 'male' ? 'مرد' : 'زن') + '</td><td>' + user.height + '</td><td>' + user.weight + '</td><td>' + new Date(user.timestamp).toLocaleDateString('fa-IR') + '</td><td><button class="btn btn-primary" onclick="selectUser(\'' + user.username + '\')" style="margin-bottom: 0.5rem;">انتخاب برای برنامه غذایی</button><br><button class="btn" onclick="deleteUser(\'' + user.username + '\')" style="background: #dc3545; color: white; padding: 0.3rem 0.8rem; font-size: 0.9rem;">حذف کاربر</button></td></tr>';
+                }).join('');
+            }
+            
+            function deleteUser(username) {
+                var confirmDelete = confirm('آیا مطمئن هستید که می\u200cخواهید کاربر "' + username + '" را حذف کنید؟\n\nاین عمل قابل بازگشت نیست!');
+                if (confirmDelete) {
+                    var adminUsers = JSON.parse(localStorage.getItem('adminData') || '[]');
+                    adminUsers = adminUsers.filter(function(u) { return u.username !== username; });
+                    localStorage.setItem('adminData', JSON.stringify(adminUsers));
+                    
+                    var users = JSON.parse(localStorage.getItem('users') || '[]');
+                    users = users.filter(function(u) { return u.username !== username; });
+                    localStorage.setItem('users', JSON.stringify(users));
+                    
+                    localStorage.removeItem('dietPlan_' + username);
+                    
+                    var dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+                    delete dietPlans[username];
+                    localStorage.setItem('adminDietPlans', JSON.stringify(dietPlans));
+                    
+                    alert('✅ کاربر با موفقیت حذف شد!');
+                    loadUsers();
+                }
+            }
+            
+            function selectUser(username) {
+                var users = JSON.parse(localStorage.getItem('adminData') || '[]');
+                selectedUser = users.find(function(u) { return u.username === username; });
+                
+                if (selectedUser) {
+                    document.getElementById('selectedUserInfo').classList.remove('hidden');
+                    document.getElementById('userInfoContent').innerHTML = '<p><strong>نام کاربری:</strong> ' + selectedUser.username + '</p><p><strong>سن:</strong> ' + selectedUser.age + ' سال</p><p><strong>جنسیت:</strong> ' + (selectedUser.gender === 'male' ? 'مرد' : 'زن') + '</p><p><strong>قد:</strong> ' + selectedUser.height + ' سانتی متر</p><p><strong>وزن:</strong> ' + selectedUser.weight + ' کیلوگرم</p>';
+                    loadExistingPlan();
+                }
+            }
+            
+            function addDietItem() {
+                var dietItems = document.getElementById('dietItems');
+                var newItem = document.createElement('div');
+                newItem.className = 'diet-item';
+                newItem.innerHTML = '<div class="form-group"><label>عنوان برنامه:</label><input type="text" name="title" placeholder="مثال: ناهار" required></div><div class="form-group"><label>توضیحات:</label><textarea name="description" placeholder="مثال: برنج، مرغ، سالاد" required></textarea></div><button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>';
+                dietItems.appendChild(newItem);
+            }
+            
+            function removeDietItem(button) {
+                var dietItems = document.getElementById('dietItems');
+                if (dietItems.children.length > 1) {
+                    button.parentElement.remove();
+                } else {
+                    alert('حداقل یک مورد باید وجود داشته باشد');
+                }
+            }
+            
+            function loadExistingPlan() {
+                if (!selectedUser) return;
+                
+                var dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+                var dietPlan = dietPlans[selectedUser.username];
+                
+                if (dietPlan && dietPlan.length > 0) {
+                    var dietItems = document.getElementById('dietItems');
+                    dietItems.innerHTML = '';
+                    
+                    dietPlan.forEach(function(item, index) {
+                        var newItem = document.createElement('div');
+                        newItem.className = 'diet-item';
+                        newItem.innerHTML = '<div class="form-group"><label>عنوان برنامه:</label><input type="text" name="title" value="' + item.title + '" required></div><div class="form-group"><label>توضیحات:</label><textarea name="description" required>' + item.description + '</textarea></div><button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>';
+                        dietItems.appendChild(newItem);
+                    });
+                }
+            }
+            
+            function clearAllData() {
+                var confirmPassword = prompt('برای پاک کردن تمام اطلاعات، رمز عبور را وارد کنید:');
+                if (confirmPassword === ADMIN_PASSWORD) {
+                    var finalConfirm = confirm('⚠️ هشدار: این عمل تمام اطلاعات کاربران و برنامه\u200cهای غذایی را پاک می\u200cکند و قابل بازگشت نیست!\n\nآیا مطمئن هستید؟');
+                    if (finalConfirm) {
+                        localStorage.removeItem('adminData');
+                        localStorage.removeItem('adminDietPlans');
+                        localStorage.removeItem('users');
+                        localStorage.removeItem('dietPlans');
+                        
+                        var keys = Object.keys(localStorage);
+                        keys.forEach(function(key) {
+                            if (key.startsWith('dietPlan_')) {
+                                localStorage.removeItem(key);
+                            }
+                        });
+                        
+                        alert('✅ تمام اطلاعات با موفقیت پاک شد!');
+                        loadUsers();
+                    }
+                } else if (confirmPassword !== null) {
+                    alert('❌ رمز عبور اشتباه است!');
+                }
+            }
+            
+            function sendDietPlanToMainSite(username, dietPlan) {
+                var mainSiteDietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+                mainSiteDietPlans[username] = dietPlan;
+                localStorage.setItem('adminDietPlans', JSON.stringify(mainSiteDietPlans));
+                localStorage.setItem('dietPlan_' + username, JSON.stringify(dietPlan));
+            }
+            
+            window.checkPassword = checkPassword;
+            window.loadUsers = loadUsers;
+            window.deleteUser = deleteUser;
+            window.selectUser = selectUser;
+            window.addDietItem = addDietItem;
+            window.removeDietItem = removeDietItem;
+            window.loadExistingPlan = loadExistingPlan;
+            window.clearAllData = clearAllData;
+            
+            document.getElementById('dietForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!selectedUser) {
+                    alert('لطفاً ابتدا یک کاربر انتخاب کنید');
+                    return;
+                }
+                
+                var dietItems = [];
+                var items = document.querySelectorAll('.diet-item');
+                items.forEach(function(item) {
+                    var title = item.querySelector('input[name="title"]').value;
+                    var description = item.querySelector('textarea[name="description"]').value;
+                    if (title && description) {
+                        dietItems.push({ title: title, description: description });
+                    }
+                });
+                
+                if (dietItems.length === 0) {
+                    alert('لطفاً حداقل یک مورد برنامه غذایی اضافه کنید');
+                    return;
+                }
+                
+                var dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+                dietPlans[selectedUser.username] = dietItems;
+                localStorage.setItem('adminDietPlans', JSON.stringify(dietPlans));
+                
+                document.getElementById('successMessage').style.display = 'block';
+                
+                setTimeout(function() {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 3000);
+                
+                sendDietPlanToMainSite(selectedUser.username, dietItems);
             });
             
-            if (dietItems.length === 0) {
-                alert('لطفاً حداقل یک مورد برنامه غذایی اضافه کنید');
-                return;
-            }
-            
-            // ذخیره در localStorage
-            const dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
-            dietPlans[selectedUser.username] = dietItems;
-            localStorage.setItem('adminDietPlans', JSON.stringify(dietPlans));
-            
-            // نمایش پیام موفقیت
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // مخفی کردن پیام بعد از ۳ ثانیه
-            setTimeout(() => {
-                document.getElementById('successMessage').style.display = 'none';
-            }, 3000);
-            
-            // ارسال به سایت اصلی
-            sendDietPlanToMainSite(selectedUser.username, dietItems);
-        });
-        
-        // ارسال برنامه غذایی به سایت اصلی
-        function sendDietPlanToMainSite(username, dietPlan) {
-            // ذخیره در localStorage برای سایت اصلی
-            const mainSiteDietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
-            mainSiteDietPlans[username] = dietPlan;
-            localStorage.setItem('adminDietPlans', JSON.stringify(mainSiteDietPlans));
-            
-            // ذخیره در localStorage عمومی برای دسترسی سایت اصلی
-            localStorage.setItem('dietPlan_' + username, JSON.stringify(dietPlan));
-            
-            console.log('برنامه غذایی برای کاربر ' + username + ' ذخیره شد');
-        }
-        
-        // پاک کردن تمام اطلاعات
-        function clearAllData() {
-            const confirmPassword = prompt('برای پاک کردن تمام اطلاعات، رمز عبور را وارد کنید:');
-            if (confirmPassword === ADMIN_PASSWORD) {
-                const finalConfirm = confirm('⚠️ هشدار: این عمل تمام اطلاعات کاربران و برنامه‌های غذایی را پاک می‌کند و قابل بازگشت نیست!\n\nآیا مطمئن هستید؟');
-                if (finalConfirm) {
-                    // پاک کردن تمام داده‌ها
-                    localStorage.removeItem('adminData');
-                    localStorage.removeItem('adminDietPlans');
-                    localStorage.removeItem('users');
-                    localStorage.removeItem('dietPlans');
-                    
-                    // پاک کردن تمام برنامه‌های غذایی فردی
-                    const keys = Object.keys(localStorage);
-                    keys.forEach(key => {
-                        if (key.startsWith('dietPlan_')) {
-                            localStorage.removeItem(key);
-                        }
-                    });
-                    
-                    alert('✅ تمام اطلاعات با موفقیت پاک شد!');
-                    loadUsers(); // بارگذاری مجدد صفحه
+            setInterval(function() {
+                if (!document.getElementById('mainContent').classList.contains('hidden')) {
+                    loadUsers();
                 }
-            } else if (confirmPassword !== null) {
-                alert('❌ رمز عبور اشتباه است!');
-            }
-        }
-        
-        // بارگذاری خودکار هر ۵ ثانیه
-        setInterval(() => {
-            if (!document.getElementById('mainContent').classList.contains('hidden')) {
-                loadUsers();
-            }
-        }, 5000);
+            }, 5000);
+        })();
     </script>
 </body>
 </html>
