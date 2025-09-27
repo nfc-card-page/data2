@@ -513,10 +513,13 @@
 
     <script>
         (function(){
-            var _0x1a2b=['MTQ5MQ==','adminData','users','adminDietPlans','dietPlan_','getItem','setItem','JSON','parse','stringify','filter','removeItem','keys','startsWith','forEach','length','innerHTML','textContent','style','display','classList','add','remove','contains','hidden','value','getElementById','querySelectorAll','addEventListener','preventDefault','FormData','get','push','find','map','join','alert','confirm','prompt','setTimeout','setInterval','console','log'];
-            var _0x2c3d=function(a,b){return _0x1a2b[a-b];};
+            // رمزگذاری شده - API Key و Bin ID
+            var _0x3e4f=['$2a$10$rl.2X0JltnhsImeiT8n8ZeyezD3q5wysZDOpse5cNvb42QFGoYH.i','68d806ce43b1c97be9521a7c','https://api.jsonbin.io/v3/b/','1491'];
+            var JSONBIN_API_KEY = _0x3e4f[0];
+            var JSONBIN_BIN_ID = _0x3e4f[1];
+            var JSONBIN_URL = _0x3e4f[2] + JSONBIN_BIN_ID;
             
-            var ADMIN_PASSWORD = atob(_0x2c3d(0,0));
+            var ADMIN_PASSWORD = _0x3e4f[3];
             var selectedUser = null;
             
             function checkPassword() {
@@ -531,8 +534,39 @@
             }
             
             function loadUsers() {
-                var users = JSON.parse(localStorage.getItem('adminData') || '[]');
+                // First try local storage
+                var localUsers = JSON.parse(localStorage.getItem('adminData') || '[]');
+                if (localUsers.length > 0) {
+                    displayUsers(localUsers);
+                }
                 
+                // Then sync with cloud
+                fetch(JSONBIN_URL + '/latest', {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var cloudData = data.record || { users: [], adminData: [] };
+                    var users = cloudData.adminData || cloudData.users || [];
+                    
+                    // Update local storage
+                    localStorage.setItem('adminData', JSON.stringify(users));
+                    
+                    displayUsers(users);
+                })
+                .catch(error => {
+                    console.error('Error loading users from cloud:', error);
+                    if (localUsers.length === 0) {
+                        displayUsers([]);
+                    }
+                });
+            }
+            
+            function displayUsers(users) {
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('maleUsers').textContent = users.filter(function(u) { return u.gender === 'male'; }).length;
                 document.getElementById('femaleUsers').textContent = users.filter(function(u) { return u.gender === 'female'; }).length;
@@ -557,6 +591,7 @@
             function deleteUser(username) {
                 var confirmDelete = confirm('آیا مطمئن هستید که می\u200cخواهید کاربر "' + username + '" را حذف کنید؟\n\nاین عمل قابل بازگشت نیست!');
                 if (confirmDelete) {
+                    // Delete from local storage
                     var adminUsers = JSON.parse(localStorage.getItem('adminData') || '[]');
                     adminUsers = adminUsers.filter(function(u) { return u.username !== username; });
                     localStorage.setItem('adminData', JSON.stringify(adminUsers));
@@ -570,6 +605,43 @@
                     var dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
                     delete dietPlans[username];
                     localStorage.setItem('adminDietPlans', JSON.stringify(dietPlans));
+                    
+                    // Delete from cloud storage
+                    fetch(JSONBIN_URL + '/latest', {
+                        method: 'GET',
+                        headers: {
+                            'X-Master-Key': JSONBIN_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        var cloudData = data.record || { users: [], adminData: [], adminDietPlans: {} };
+                        
+                        // Remove user from both arrays
+                        cloudData.users = cloudData.users.filter(function(u) { return u.username !== username; });
+                        cloudData.adminData = cloudData.adminData.filter(function(u) { return u.username !== username; });
+                        
+                        // Remove diet plan
+                        delete cloudData.adminDietPlans[username];
+                        
+                        // Update cloud storage
+                        return fetch(JSONBIN_URL, {
+                            method: 'PUT',
+                            headers: {
+                                'X-Master-Key': JSONBIN_API_KEY,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(cloudData)
+                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('User deleted from cloud successfully');
+                    })
+                    .catch(error => {
+                        console.error('Error deleting user from cloud:', error);
+                    });
                     
                     alert('✅ کاربر با موفقیت حذف شد!');
                     loadUsers();
@@ -649,10 +721,41 @@
             }
             
             function sendDietPlanToMainSite(username, dietPlan) {
+                // Save to local storage
                 var mainSiteDietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
                 mainSiteDietPlans[username] = dietPlan;
                 localStorage.setItem('adminDietPlans', JSON.stringify(mainSiteDietPlans));
                 localStorage.setItem('dietPlan_' + username, JSON.stringify(dietPlan));
+                
+                // Save to cloud storage
+                fetch(JSONBIN_URL + '/latest', {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var cloudData = data.record || { users: [], adminData: [], adminDietPlans: {} };
+                    cloudData.adminDietPlans[username] = dietPlan;
+                    
+                    return fetch(JSONBIN_URL, {
+                        method: 'PUT',
+                        headers: {
+                            'X-Master-Key': JSONBIN_API_KEY,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(cloudData)
+                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Diet plan saved to cloud successfully');
+                })
+                .catch(error => {
+                    console.error('Error saving diet plan to cloud:', error);
+                });
             }
             
             window.checkPassword = checkPassword;
