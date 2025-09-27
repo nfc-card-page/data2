@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سایت مدیریت - مشاهده اطلاعات و برنامه غذایی</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+        
+        .password-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .password-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .password-input {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .password-input input {
+            padding: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .users-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .users-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+            font-size: 1.2rem;
+        }
+        
+        .diet-plan-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .diet-plan-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .diet-items {
+            margin-top: 2rem;
+        }
+        
+        .diet-item {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .diet-item h3 {
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .diet-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .add-item-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        
+        .add-item-btn:hover {
+            background: #138496;
+        }
+        
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        
+        .remove-item-btn:hover {
+            background: #c82333;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .site-links {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .site-links h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .site-links input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>سایت مدیریت - مشاهده اطلاعات و برنامه غذایی</h1>
+        
+        <!-- تنظیمات سایت -->
+        <div class="site-links">
+            <h3>تنظیمات سایت</h3>
+            <label>آدرس سایت اصلی:</label>
+            <input type="text" id="mainSiteUrl" placeholder="https://your-main-site.github.io" value="https://your-main-site.github.io">
+            <label>آدرس سایت مدیریت (فعلی):</label>
+            <input type="text" id="adminSiteUrl" placeholder="https://your-admin-site.github.io" value="https://your-admin-site.github.io">
+        </div>
+        
+        <!-- بخش رمز عبور -->
+        <div class="password-section">
+            <h2>ورود به پنل مدیریت</h2>
+            <div class="password-input">
+                <input type="password" id="passwordInput" placeholder="رمز عبور را وارد کنید">
+                <button class="btn btn-primary" onclick="checkPassword()">ورود</button>
+            </div>
+            <button class="btn btn-secondary" onclick="changePassword()">تغییر رمز عبور</button>
+        </div>
+        
+        <!-- محتوای اصلی (پس از ورود) -->
+        <div id="mainContent" class="hidden">
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div>کل کاربران</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="maleUsers">0</div>
+                    <div>کاربران مرد</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="femaleUsers">0</div>
+                    <div>کاربران زن</div>
+                </div>
+            </div>
+            
+            <div id="usersTable">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>نام کاربری</th>
+                            <th>سن</th>
+                            <th>جنسیت</th>
+                            <th>قد (سانتی متر)</th>
+                            <th>وزن (کیلوگرم)</th>
+                            <th>تاریخ ثبت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="no-data" id="noData" style="display: none;">
+                هیچ اطلاعاتی ثبت نشده است
+            </div>
+            
+            <!-- بخش برنامه غذایی -->
+            <div class="diet-plan-section">
+                <h2>برنامه غذایی برای کاربر انتخاب شده</h2>
+                <div class="success-message" id="successMessage">
+                    برنامه غذایی با موفقیت ذخیره شد!
+                </div>
+                
+                <div id="selectedUserInfo" class="hidden">
+                    <h3>اطلاعات کاربر انتخاب شده:</h3>
+                    <div id="userInfoContent"></div>
+                </div>
+                
+                <form id="dietForm">
+                    <div class="diet-items" id="dietItems">
+                        <div class="diet-item">
+                            <div class="form-group">
+                                <label>عنوان برنامه:</label>
+                                <input type="text" name="title" placeholder="مثال: صبحانه" required>
+                            </div>
+                            <div class="form-group">
+                                <label>توضیحات:</label>
+                                <textarea name="description" placeholder="مثال: یک لیوان شیر، دو عدد تخم مرغ، نان تست" required></textarea>
+                            </div>
+                            <button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="add-item-btn" onclick="addDietItem()">افزودن مورد جدید</button>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">ذخیره برنامه غذایی</button>
+                        <button type="button" class="btn btn-secondary" onclick="loadExistingPlan()">بارگذاری برنامه موجود</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تنظیمات اولیه
+        const DEFAULT_PASSWORD = '1234'; // رمز پیش‌فرض
+        let currentPassword = localStorage.getItem('adminPassword') || DEFAULT_PASSWORD;
+        let selectedUser = null;
+        
+        // بررسی رمز عبور
+        function checkPassword() {
+            const inputPassword = document.getElementById('passwordInput').value;
+            if (inputPassword === currentPassword) {
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.querySelector('.password-section').classList.add('hidden');
+                loadUsers();
+            } else {
+                alert('رمز عبور اشتباه است');
+            }
+        }
+        
+        // تغییر رمز عبور
+        function changePassword() {
+            const newPassword = prompt('رمز عبور جدید را وارد کنید:');
+            if (newPassword && newPassword.length >= 4) {
+                currentPassword = newPassword;
+                localStorage.setItem('adminPassword', newPassword);
+                alert('رمز عبور با موفقیت تغییر کرد');
+            } else {
+                alert('رمز عبور باید حداقل ۴ کاراکتر باشد');
+            }
+        }
+        
+        // بارگذاری کاربران
+        function loadUsers() {
+            const users = JSON.parse(localStorage.getItem('adminData') || '[]');
+            
+            // آپدیت آمار
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('maleUsers').textContent = users.filter(u => u.gender === 'male').length;
+            document.getElementById('femaleUsers').textContent = users.filter(u => u.gender === 'female').length;
+            
+            const tbody = document.getElementById('usersTableBody');
+            const noData = document.getElementById('noData');
+            
+            if (users.length === 0) {
+                document.getElementById('usersTable').style.display = 'none';
+                noData.style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('usersTable').style.display = 'block';
+            noData.style.display = 'none';
+            
+            tbody.innerHTML = users.map((user, index) => `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.age}</td>
+                    <td>${user.gender === 'male' ? 'مرد' : 'زن'}</td>
+                    <td>${user.height}</td>
+                    <td>${user.weight}</td>
+                    <td>${new Date(user.timestamp).toLocaleDateString('fa-IR')}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="selectUser('${user.username}')">
+                            انتخاب برای برنامه غذایی
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // انتخاب کاربر برای برنامه غذایی
+        function selectUser(username) {
+            const users = JSON.parse(localStorage.getItem('adminData') || '[]');
+            selectedUser = users.find(u => u.username === username);
+            
+            if (selectedUser) {
+                document.getElementById('selectedUserInfo').classList.remove('hidden');
+                document.getElementById('userInfoContent').innerHTML = `
+                    <p><strong>نام کاربری:</strong> ${selectedUser.username}</p>
+                    <p><strong>سن:</strong> ${selectedUser.age} سال</p>
+                    <p><strong>جنسیت:</strong> ${selectedUser.gender === 'male' ? 'مرد' : 'زن'}</p>
+                    <p><strong>قد:</strong> ${selectedUser.height} سانتی متر</p>
+                    <p><strong>وزن:</strong> ${selectedUser.weight} کیلوگرم</p>
+                `;
+                
+                // بارگذاری برنامه موجود
+                loadExistingPlan();
+            }
+        }
+        
+        // افزودن مورد جدید برنامه غذایی
+        function addDietItem() {
+            const dietItems = document.getElementById('dietItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'diet-item';
+            newItem.innerHTML = `
+                <div class="form-group">
+                    <label>عنوان برنامه:</label>
+                    <input type="text" name="title" placeholder="مثال: ناهار" required>
+                </div>
+                <div class="form-group">
+                    <label>توضیحات:</label>
+                    <textarea name="description" placeholder="مثال: برنج، مرغ، سالاد" required></textarea>
+                </div>
+                <button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>
+            `;
+            dietItems.appendChild(newItem);
+        }
+        
+        // حذف مورد برنامه غذایی
+        function removeDietItem(button) {
+            const dietItems = document.getElementById('dietItems');
+            if (dietItems.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('حداقل یک مورد باید وجود داشته باشد');
+            }
+        }
+        
+        // بارگذاری برنامه موجود
+        function loadExistingPlan() {
+            if (!selectedUser) return;
+            
+            const dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+            const dietPlan = dietPlans[selectedUser.username];
+            
+            if (dietPlan && dietPlan.length > 0) {
+                const dietItems = document.getElementById('dietItems');
+                dietItems.innerHTML = '';
+                
+                dietPlan.forEach((item, index) => {
+                    const newItem = document.createElement('div');
+                    newItem.className = 'diet-item';
+                    newItem.innerHTML = `
+                        <div class="form-group">
+                            <label>عنوان برنامه:</label>
+                            <input type="text" name="title" value="${item.title}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>توضیحات:</label>
+                            <textarea name="description" required>${item.description}</textarea>
+                        </div>
+                        <button type="button" class="remove-item-btn" onclick="removeDietItem(this)">حذف این مورد</button>
+                    `;
+                    dietItems.appendChild(newItem);
+                });
+            }
+        }
+        
+        // ذخیره برنامه غذایی
+        document.getElementById('dietForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedUser) {
+                alert('لطفاً ابتدا یک کاربر انتخاب کنید');
+                return;
+            }
+            
+            const dietItems = [];
+            const items = document.querySelectorAll('.diet-item');
+            items.forEach(item => {
+                const title = item.querySelector('input[name="title"]').value;
+                const description = item.querySelector('textarea[name="description"]').value;
+                if (title && description) {
+                    dietItems.push({ title, description });
+                }
+            });
+            
+            if (dietItems.length === 0) {
+                alert('لطفاً حداقل یک مورد برنامه غذایی اضافه کنید');
+                return;
+            }
+            
+            // ذخیره در localStorage
+            const dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+            dietPlans[selectedUser.username] = dietItems;
+            localStorage.setItem('adminDietPlans', JSON.stringify(dietPlans));
+            
+            // نمایش پیام موفقیت
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // مخفی کردن پیام بعد از ۳ ثانیه
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+            
+            // ارسال به سایت اصلی
+            sendDietPlanToMainSite(selectedUser.username, dietItems);
+        });
+        
+        // ارسال برنامه غذایی به سایت اصلی
+        function sendDietPlanToMainSite(username, dietPlan) {
+            // ذخیره در localStorage برای سایت اصلی
+            const mainSiteDietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
+            mainSiteDietPlans[username] = dietPlan;
+            localStorage.setItem('adminDietPlans', mainSiteDietPlans);
+            
+            // اگر سایت‌ها روی همان دامنه باشند، می‌توانید از postMessage استفاده کنید
+            // const mainSiteUrl = document.getElementById('mainSiteUrl').value;
+            // window.parent.postMessage({type: 'dietPlan', username, dietPlan}, mainSiteUrl);
+        }
+        
+        // بارگذاری خودکار هر ۵ ثانیه
+        setInterval(() => {
+            if (!document.getElementById('mainContent').classList.contains('hidden')) {
+                loadUsers();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
