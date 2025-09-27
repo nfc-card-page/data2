@@ -534,13 +534,7 @@
             }
             
             function loadUsers() {
-                // First try local storage
-                var localUsers = JSON.parse(localStorage.getItem('adminData') || '[]');
-                if (localUsers.length > 0) {
-                    displayUsers(localUsers);
-                }
-                
-                // Then sync with cloud
+                // Load from cloud only
                 fetch(JSONBIN_URL + '/latest', {
                     method: 'GET',
                     headers: {
@@ -553,16 +547,11 @@
                     var cloudData = data.record || { users: [], adminData: [] };
                     var users = cloudData.adminData || cloudData.users || [];
                     
-                    // Update local storage
-                    localStorage.setItem('adminData', JSON.stringify(users));
-                    
                     displayUsers(users);
                 })
                 .catch(error => {
                     console.error('Error loading users from cloud:', error);
-                    if (localUsers.length === 0) {
-                        displayUsers([]);
-                    }
+                    displayUsers([]);
                 });
             }
             
@@ -591,22 +580,7 @@
             function deleteUser(username) {
                 var confirmDelete = confirm('آیا مطمئن هستید که می\u200cخواهید کاربر "' + username + '" را حذف کنید؟\n\nاین عمل قابل بازگشت نیست!');
                 if (confirmDelete) {
-                    // Delete from local storage
-                    var adminUsers = JSON.parse(localStorage.getItem('adminData') || '[]');
-                    adminUsers = adminUsers.filter(function(u) { return u.username !== username; });
-                    localStorage.setItem('adminData', JSON.stringify(adminUsers));
-                    
-                    var users = JSON.parse(localStorage.getItem('users') || '[]');
-                    users = users.filter(function(u) { return u.username !== username; });
-                    localStorage.setItem('users', JSON.stringify(users));
-                    
-                    localStorage.removeItem('dietPlan_' + username);
-                    
-                    var dietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
-                    delete dietPlans[username];
-                    localStorage.setItem('adminDietPlans', JSON.stringify(dietPlans));
-                    
-                    // Delete from cloud storage
+                    // Delete from cloud storage only
                     fetch(JSONBIN_URL + '/latest', {
                         method: 'GET',
                         headers: {
@@ -700,20 +674,26 @@
                 if (confirmPassword === ADMIN_PASSWORD) {
                     var finalConfirm = confirm('⚠️ هشدار: این عمل تمام اطلاعات کاربران و برنامه\u200cهای غذایی را پاک می\u200cکند و قابل بازگشت نیست!\n\nآیا مطمئن هستید؟');
                     if (finalConfirm) {
-                        localStorage.removeItem('adminData');
-                        localStorage.removeItem('adminDietPlans');
-                        localStorage.removeItem('users');
-                        localStorage.removeItem('dietPlans');
-                        
-                        var keys = Object.keys(localStorage);
-                        keys.forEach(function(key) {
-                            if (key.startsWith('dietPlan_')) {
-                                localStorage.removeItem(key);
-                            }
+                        // Clear cloud storage
+                        var emptyData = { users: [], adminData: [], adminDietPlans: {} };
+                        fetch(JSONBIN_URL, {
+                            method: 'PUT',
+                            headers: {
+                                'X-Master-Key': JSONBIN_API_KEY,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(emptyData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('All data cleared from cloud');
+                            alert('✅ تمام اطلاعات با موفقیت پاک شد!');
+                            loadUsers();
+                        })
+                        .catch(error => {
+                            console.error('Error clearing data:', error);
+                            alert('❌ خطا در پاک کردن اطلاعات!');
                         });
-                        
-                        alert('✅ تمام اطلاعات با موفقیت پاک شد!');
-                        loadUsers();
                     }
                 } else if (confirmPassword !== null) {
                     alert('❌ رمز عبور اشتباه است!');
@@ -721,13 +701,7 @@
             }
             
             function sendDietPlanToMainSite(username, dietPlan) {
-                // Save to local storage
-                var mainSiteDietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
-                mainSiteDietPlans[username] = dietPlan;
-                localStorage.setItem('adminDietPlans', JSON.stringify(mainSiteDietPlans));
-                localStorage.setItem('dietPlan_' + username, JSON.stringify(dietPlan));
-                
-                // Save to cloud storage
+                // Save to cloud storage only
                 fetch(JSONBIN_URL + '/latest', {
                     method: 'GET',
                     headers: {
