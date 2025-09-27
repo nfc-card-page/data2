@@ -275,9 +275,9 @@
         <div class="site-links">
             <h3>تنظیمات سایت</h3>
             <label>آدرس سایت اصلی:</label>
-            <input type="text" id="mainSiteUrl" placeholder="https://your-main-site.github.io" value="https://your-main-site.github.io">
+            <input type="text" id="mainSiteUrl" value="https://nfc-card-page.github.io/Nutrition-plan/" readonly>
             <label>آدرس سایت مدیریت (فعلی):</label>
-            <input type="text" id="adminSiteUrl" placeholder="https://your-admin-site.github.io" value="https://your-admin-site.github.io">
+            <input type="text" id="adminSiteUrl" value="https://nfc-card-page.github.io/data2/" readonly>
         </div>
         
         <!-- بخش رمز عبور -->
@@ -369,14 +369,13 @@
 
     <script>
         // تنظیمات اولیه
-        const DEFAULT_PASSWORD = '1234'; // رمز پیش‌فرض
-        let currentPassword = localStorage.getItem('adminPassword') || DEFAULT_PASSWORD;
+        const ADMIN_PASSWORD = '1234'; // رمز ثابت - غیرقابل تغییر
         let selectedUser = null;
         
         // بررسی رمز عبور
         function checkPassword() {
             const inputPassword = document.getElementById('passwordInput').value;
-            if (inputPassword === currentPassword) {
+            if (inputPassword === ADMIN_PASSWORD) {
                 document.getElementById('mainContent').classList.remove('hidden');
                 document.querySelector('.password-section').classList.add('hidden');
                 loadUsers();
@@ -385,16 +384,9 @@
             }
         }
         
-        // تغییر رمز عبور
+        // تغییر رمز عبور - غیرفعال شده
         function changePassword() {
-            const newPassword = prompt('رمز عبور جدید را وارد کنید:');
-            if (newPassword && newPassword.length >= 4) {
-                currentPassword = newPassword;
-                localStorage.setItem('adminPassword', newPassword);
-                alert('رمز عبور با موفقیت تغییر کرد');
-            } else {
-                alert('رمز عبور باید حداقل ۴ کاراکتر باشد');
-            }
+            alert('رمز عبور قابل تغییر نیست');
         }
         
         // بارگذاری کاربران
@@ -560,11 +552,12 @@
             // ذخیره در localStorage برای سایت اصلی
             const mainSiteDietPlans = JSON.parse(localStorage.getItem('adminDietPlans') || '{}');
             mainSiteDietPlans[username] = dietPlan;
-            localStorage.setItem('adminDietPlans', mainSiteDietPlans);
+            localStorage.setItem('adminDietPlans', JSON.stringify(mainSiteDietPlans));
             
-            // اگر سایت‌ها روی همان دامنه باشند، می‌توانید از postMessage استفاده کنید
-            // const mainSiteUrl = document.getElementById('mainSiteUrl').value;
-            // window.parent.postMessage({type: 'dietPlan', username, dietPlan}, mainSiteUrl);
+            // ذخیره در localStorage عمومی برای دسترسی سایت اصلی
+            localStorage.setItem('dietPlan_' + username, JSON.stringify(dietPlan));
+            
+            console.log('برنامه غذایی برای کاربر ' + username + ' ذخیره شد');
         }
         
         // بارگذاری خودکار هر ۵ ثانیه
