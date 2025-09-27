@@ -15,7 +15,170 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem 0;
+            padding: 2rem 1rem;
+        }
+        
+        /* طراحی موبایل */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            
+            .container {
+                width: 95% !important;
+                max-width: none !important;
+                padding: 1.5rem !important;
+                margin: 0 !important;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .password-section {
+                padding: 1.5rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .password-input {
+                flex-direction: column !important;
+                gap: 0.5rem !important;
+            }
+            
+            .password-input input {
+                width: 100% !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .password-input button {
+                width: 100% !important;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.8rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .stat-card {
+                padding: 1rem !important;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem !important;
+            }
+            
+            .users-table {
+                font-size: 0.8rem !important;
+                overflow-x: auto !important;
+                display: block !important;
+                white-space: nowrap !important;
+            }
+            
+            .users-table th,
+            .users-table td {
+                padding: 0.5rem !important;
+                min-width: 80px !important;
+            }
+            
+            .users-table th:nth-child(1),
+            .users-table td:nth-child(1) {
+                min-width: 100px !important;
+            }
+            
+            .users-table th:nth-child(7),
+            .users-table td:nth-child(7) {
+                min-width: 120px !important;
+            }
+            
+            .btn {
+                padding: 0.3rem 0.5rem !important;
+                font-size: 0.7rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+            
+            .diet-plan-section {
+                padding: 1.5rem !important;
+                margin-top: 2rem !important;
+            }
+            
+            .diet-item {
+                padding: 1rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem !important;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                padding: 0.8rem !important;
+                font-size: 0.9rem !important;
+            }
+            
+            .add-item-btn,
+            .remove-item-btn {
+                padding: 0.4rem 0.8rem !important;
+                font-size: 0.8rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem !important;
+            }
+            
+            h1 {
+                font-size: 1.8rem !important;
+            }
+            
+            .password-section {
+                padding: 1rem !important;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+            }
+            
+            .stat-card {
+                padding: 0.8rem !important;
+            }
+            
+            .stat-number {
+                font-size: 1.2rem !important;
+            }
+            
+            .users-table {
+                font-size: 0.7rem !important;
+            }
+            
+            .users-table th,
+            .users-table td {
+                padding: 0.3rem !important;
+                min-width: 70px !important;
+            }
+            
+            .btn {
+                padding: 0.2rem 0.4rem !important;
+                font-size: 0.6rem !important;
+            }
+            
+            .diet-plan-section {
+                padding: 1rem !important;
+            }
+            
+            .diet-item {
+                padding: 0.8rem !important;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                padding: 0.6rem !important;
+                font-size: 0.8rem !important;
+            }
         }
         
         .container {
