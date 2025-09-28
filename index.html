@@ -1,51 +1,60 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>پنل ادمین</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پنل ادمین</title>
+<style>
+/* تمام CSS قبلی بدون تغییر */
+</style>
 </head>
 <body>
-  <h1>پنل ادمین</h1>
-  <button id="loadData">بارگذاری داده‌ها</button>
-  <button id="clearData">پاک کردن همه داده‌ها</button>
-  <pre id="dataList"></pre>
+<div class="container">
+    <a href="index.html" class="back-btn">← بازگشت به صفحه اصلی</a>
+    <h1>پنل ادمین</h1>
 
-  <script>
-    const API_URL = 'https://user-data-api.clad90093.workers.dev/';
-    const ADMIN_PASSWORD = '1491';
+    <button id="loadUsers" class="btn btn-primary">نمایش همه کاربران</button>
+    <button id="clearUsers" class="btn btn-primary" style="margin-top:10px;background:red;">پاک کردن همه داده‌ها</button>
 
-    const loadDataButton = document.getElementById('loadData');
-    const clearDataButton = document.getElementById('clearData');
-    const dataList = document.getElementById('dataList');
+    <div id="userList" style="margin-top:20px;"></div>
+</div>
 
-    async function loadData() {
-      const response = await fetch(`${API_URL}?password=${ADMIN_PASSWORD}`);
-      const result = await response.json();
-      if (result.success) {
-        dataList.textContent = JSON.stringify(result.data, null, 2);
-      } else {
-        dataList.textContent = 'خطا در بارگذاری داده‌ها';
-      }
+<script>
+const WORKER_URL = 'https://user-data-api.clad90093.workers.dev';
+
+document.getElementById('loadUsers').addEventListener('click', async () => {
+    try {
+        const res = await fetch(`${WORKER_URL}/list`);
+        const users = await res.json();
+        const listDiv = document.getElementById('userList');
+        listDiv.innerHTML = users.map(u => `
+            <div class="diet-item">
+                <p>نام کاربری: ${u.username}</p>
+                <p>سن: ${u.age}</p>
+                <p>جنسیت: ${u.gender}</p>
+                <p>قد: ${u.height} cm</p>
+                <p>وزن: ${u.weight} kg</p>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error(err);
+        alert('خطا در دریافت داده‌ها');
     }
+});
 
-    async function clearData() {
-      const password = prompt('لطفاً رمز عبور را وارد کنید:');
-      if (password === ADMIN_PASSWORD) {
-        const response = await fetch(`${API_URL}?password=${password}`, { method: 'DELETE' });
-        const result = await response.json();
-        if (result.success) {
-          alert('همه داده‌ها پاک شد');
-          loadData();
-        } else {
-          alert('خطا در پاک کردن داده‌ها');
+document.getElementById('clearUsers').addEventListener('click', async () => {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید همه داده‌ها پاک شود؟')) return;
+    try {
+        const res = await fetch(`${WORKER_URL}/clear`, { method: 'DELETE' });
+        if (res.ok) {
+            document.getElementById('userList').innerHTML = '';
+            alert('داده‌ها پاک شد');
         }
-      } else {
-        alert('رمز عبور اشتباه است');
-      }
+    } catch (err) {
+        console.error(err);
+        alert('خطا در پاک کردن داده‌ها');
     }
-
-    loadDataButton.addEventListener('click', loadData);
-    clearDataButton.addEventListener('click', clearData);
-  </script>
+});
+</script>
 </body>
 </html>
