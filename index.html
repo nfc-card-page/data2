@@ -1,228 +1,51 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>پنل ادمین (با EMBEDDED JSON)</title>
-<style>
-  body{font-family:Tahoma, sans-serif; padding:2rem; background:#eef2f7}
-  .wrap{max-width:1100px;margin:0 auto;background:white;padding:1.2rem;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.06)}
-  .hidden{display:none}
-  table{width:100%;border-collapse:collapse;margin-top:1rem}
-  th,td{padding:.6rem;border-bottom:1px solid #e9eef5;text-align:right}
-  button{padding:.4rem .6rem;border-radius:6px;border:none;cursor:pointer}
-  .btn-primary{background:#007bff;color:#fff}
-  .btn-danger{background:#dc3545;color:#fff}
-  .area{margin-top:1rem}
-  input,textarea{width:100%;padding:.5rem;border:1px solid #ddd;border-radius:6px}
-</style>
+  <meta charset="UTF-8">
+  <title>پنل ادمین</title>
 </head>
 <body>
-  <div class="wrap">
-    <h2>پنل مدیریت</h2>
+  <h1>پنل ادمین</h1>
+  <button id="loadData">بارگذاری داده‌ها</button>
+  <button id="clearData">پاک کردن همه داده‌ها</button>
+  <pre id="dataList"></pre>
 
-    <div id="loginBox">
-      <label>رمز ادمین:</label>
-      <input id="adminPass" type="password" placeholder="رمز را وارد کنید">
-      <button id="loginBtn" class="btn-primary">ورود</button>
-      <p style="color:#666;font-size:0.9rem;margin-top:.5rem">رمز پیش‌فرض را بعدها تغییر دهید.</p>
-    </div>
+  <script>
+    const API_URL = 'https://user-data-api.clad90093.workers.dev/';
+    const ADMIN_PASSWORD = '1491';
 
-    <div id="main" class="hidden">
-      <div style="display:flex;gap:1rem;align-items:center;justify-content:space-between">
-        <div><strong>کل کاربران:</strong> <span id="totalUsers">0</span></div>
-        <div>
-          <button onclick="logout()">خروج</button>
-          <button onclick="clearAll()" style="background:#dc3545;color:white;border-radius:6px;padding:.4rem .6rem">پاک کردن همه</button>
-        </div>
-      </div>
+    const loadDataButton = document.getElementById('loadData');
+    const clearDataButton = document.getElementById('clearData');
+    const dataList = document.getElementById('dataList');
 
-      <div id="usersArea" class="area">
-        <table>
-          <thead><tr><th>نام کاربری</th><th>سن</th><th>جنسیت</th><th>قد</th><th>وزن</th><th>تاریخ</th><th>عملیات</th></tr></thead>
-          <tbody id="usersBody"></tbody>
-        </table>
-      </div>
+    async function loadData() {
+      const response = await fetch(`${API_URL}?password=${ADMIN_PASSWORD}`);
+      const result = await response.json();
+      if (result.success) {
+        dataList.textContent = JSON.stringify(result.data, null, 2);
+      } else {
+        dataList.textContent = 'خطا در بارگذاری داده‌ها';
+      }
+    }
 
-      <div class="area">
-        <h3>برنامه غذایی برای کاربر انتخاب شده: <span id="selUser">—</span></h3>
-        <div id="selectedInfo"></div>
-        <form id="dietForm">
-          <div id="dietItems"></div>
-          <button type="button" onclick="addDietItem()">افزودن مورد</button>
-          <button type="submit" class="btn-primary">ذخیره برنامه</button>
-        </form>
-        <p id="adminStatus" style="color:green"></p>
-      </div>
-    </div>
-  </div>
+    async function clearData() {
+      const password = prompt('لطفاً رمز عبور را وارد کنید:');
+      if (password === ADMIN_PASSWORD) {
+        const response = await fetch(`${API_URL}?password=${password}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.success) {
+          alert('همه داده‌ها پاک شد');
+          loadData();
+        } else {
+          alert('خطا در پاک کردن داده‌ها');
+        }
+      } else {
+        alert('رمز عبور اشتباه است');
+      }
+    }
 
-<script>
-/* همان EMBEDDED_BIN که در index.html هست (کپی/همگام نگه دار) */
-const EMBEDDED_BIN = {
-  users: [],
-  shared_diet_plans: {}
-};
-/* اگر می‌خواهی JsonBin سینک شود این مقادیر را پر کن؛ در غیر اینصورت خالی بگذار */
-const JSONBIN_BIN_ID = '';
-const JSONBIN_API_KEY = '';
-const ADMIN_PASSWORD = '1491'; // اگر می‌خواهی تغییر بده
-const BIN_URL = JSONBIN_BIN_ID ? `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}` : null;
-
-function getLocalCache() {
-  try { return JSON.parse(localStorage.getItem('app_shared_bin') || 'null'); }
-  catch(e){ return null; }
-}
-function setLocalCache(obj) {
-  localStorage.setItem('app_shared_bin', JSON.stringify(obj));
-}
-async function fetchBinLatest(){
-  if (!BIN_URL || !JSONBIN_API_KEY) {
-    const cached = getLocalCache();
-    return cached ? cached : JSON.parse(JSON.stringify(EMBEDDED_BIN));
-  }
-  try {
-    const res = await fetch(`${BIN_URL}/latest`, { headers: { 'X-Master-Key': JSONBIN_API_KEY } });
-    if (!res.ok) throw new Error('fetch failed');
-    const j = await res.json();
-    return j.record || {};
-  } catch(e){
-    const cached = getLocalCache();
-    return cached ? cached : JSON.parse(JSON.stringify(EMBEDDED_BIN));
-  }
-}
-async function putBin(obj){
-  setLocalCache(obj);
-  if (!BIN_URL || !JSONBIN_API_KEY) return true;
-  try {
-    const res = await fetch(BIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-      body: JSON.stringify(obj)
-    });
-    return res.ok;
-  } catch(e){ return false; }
-}
-
-let binCache = null;
-let selectedUser = null;
-
-document.getElementById('loginBtn').addEventListener('click', function(){
-  const p = document.getElementById('adminPass').value;
-  if (p === ADMIN_PASSWORD) {
-    document.getElementById('loginBox').classList.add('hidden');
-    document.getElementById('main').classList.remove('hidden');
-    loadUsers();
-  } else alert('رمز اشتباه است');
-});
-function logout(){
-  document.getElementById('main').classList.add('hidden');
-  document.getElementById('loginBox').classList.remove('hidden');
-  document.getElementById('adminPass').value = '';
-}
-
-async function loadUsers(){
-  binCache = await fetchBinLatest();
-  const users = binCache.users || [];
-  document.getElementById('totalUsers').textContent = users.length;
-  const tbody = document.getElementById('usersBody');
-  tbody.innerHTML = users.map(u => {
-    const date = u.timestamp ? new Date(u.timestamp).toLocaleString('fa-IR') : '-';
-    return `<tr>
-      <td>${escapeHtml(u.username)}</td>
-      <td>${escapeHtml(u.age)}</td>
-      <td>${u.gender === 'male' ? 'مرد' : 'زن'}</td>
-      <td>${escapeHtml(u.height)}</td>
-      <td>${escapeHtml(u.weight)}</td>
-      <td>${date}</td>
-      <td>
-        <button onclick="selectUser('${escapeJs(u.username)}')" class="btn-primary">انتخاب</button>
-        <button onclick="deleteUser('${escapeJs(u.username)}')" class="btn-danger">حذف</button>
-      </td>
-    </tr>`;
-  }).join('');
-  if(users.length===0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666">هیچ کاربری وجود ندارد</td></tr>';
-  selectedUser = null;
-  document.getElementById('selUser').textContent = '—';
-  document.getElementById('selectedInfo').innerHTML = '';
-  document.getElementById('dietItems').innerHTML = '';
-}
-
-function escapeHtml(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function escapeJs(s){ return (s||'').toString().replace(/'/g,"\\'").replace(/"/g,'\\"'); }
-
-async function deleteUser(username){
-  if(!confirm('آیا مطمئن هستید؟ حذف کاربر دائمی است')) return;
-  binCache = await fetchBinLatest();
-  binCache.users = (binCache.users || []).filter(u => u.username !== username);
-  binCache.shared_diet_plans = binCache.shared_diet_plans || {};
-  delete binCache.shared_diet_plans[username];
-  const ok = await putBin(binCache);
-  if(ok){ alert('حذف انجام شد'); loadUsers(); }
-  else alert('خطا در حذف');
-}
-
-async function selectUser(username){
-  binCache = await fetchBinLatest();
-  const user = (binCache.users || []).find(u=>u.username===username);
-  if(!user) { alert('کاربر یافت نشد'); return; }
-  selectedUser = user;
-  document.getElementById('selUser').textContent = username;
-  document.getElementById('selectedInfo').innerHTML = `<p><strong>نام کاربری:</strong> ${escapeHtml(user.username)}</p><p><strong>سن:</strong> ${escapeHtml(user.age)}</p>`;
-  loadDietForSelectedUser();
-}
-
-function addDietItem(data){
-  const container = document.getElementById('dietItems');
-  const title = data && data.title ? data.title : '';
-  const desc = data && data.description ? data.description : '';
-  const div = document.createElement('div');
-  div.style.border='1px solid #eee'; div.style.padding='8px'; div.style.marginBottom='8px';
-  div.innerHTML = `<label>عنوان</label><input name="title" value="${escapeHtml(title)}" required>
-                   <label>توضیحات</label><textarea name="description" required>${escapeHtml(desc)}</textarea>
-                   <div style="margin-top:6px"><button type="button" onclick="this.closest('div').remove()">حذف مورد</button></div>`;
-  container.appendChild(div);
-}
-
-async function loadDietForSelectedUser(){
-  if(!selectedUser) return;
-  binCache = await fetchBinLatest();
-  const plans = (binCache.shared_diet_plans || {})[selectedUser.username] || [];
-  const container = document.getElementById('dietItems');
-  container.innerHTML = '';
-  if(plans.length===0) addDietItem();
-  else plans.forEach(addDietItem);
-}
-
-document.getElementById('dietForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  if(!selectedUser){ alert('ابتدا یک کاربر را انتخاب کنید'); return; }
-  const items = [];
-  document.querySelectorAll('#dietItems > div').forEach(div=>{
-    const title = div.querySelector('input[name="title"]').value.trim();
-    const description = div.querySelector('textarea[name="description"]').value.trim();
-    if(title && description) items.push({title,description});
-  });
-  if(items.length===0){ alert('حداقل یک آیتم لازم است'); return; }
-
-  binCache = await fetchBinLatest();
-  binCache.shared_diet_plans = binCache.shared_diet_plans || {};
-  binCache.shared_diet_plans[selectedUser.username] = items;
-  const ok = await putBin(binCache);
-  if(ok){
-    document.getElementById('adminStatus').textContent = 'ذخیره با موفقیت انجام شد ✅';
-    setTimeout(()=>document.getElementById('adminStatus').textContent='', 2500);
-  } else alert('خطا در ذخیره');
-});
-
-async function clearAll(){
-  const p = prompt('برای پاک کردن همه اطلاعات، رمز را وارد کنید:');
-  if(p !== ADMIN_PASSWORD){ alert('رمز اشتباه'); return; }
-  const empty = { users: [], shared_diet_plans: {} };
-  const ok = await putBin(empty);
-  if(ok){ alert('تمام داده‌ها حذف شد'); loadUsers(); }
-  else alert('خطا در پاکسازی');
-}
-</script>
+    loadDataButton.addEventListener('click', loadData);
+    clearDataButton.addEventListener('click', clearData);
+  </script>
 </body>
 </html>
