@@ -446,6 +446,9 @@
         </div>
         
         <div style="text-align: center; margin: 2rem 0;">
+            <button class="btn" style="background: #17a2b8; color: white; padding: 1rem 2rem; font-size: 1.2rem; margin-right: 1rem;" onclick="testWorkerAPI()">
+                🔧 تست Worker API
+            </button>
             <button class="btn" style="background: #dc3545; color: white; padding: 1rem 2rem; font-size: 1.2rem;" onclick="clearAllData()">
                 🗑️ پاک کردن تمام اطلاعات
             </button>
@@ -523,13 +526,16 @@
                 if (inputPassword === ADMIN_PASSWORD) {
                     document.getElementById('mainContent').classList.remove('hidden');
                     document.querySelector('.password-section').classList.add('hidden');
-                    loadUsers();
+                    
+                    // Test API connection first
+                    testAPIConnection();
                 } else {
                     alert('رمز عبور اشتباه است');
                 }
             }
             
-            function loadUsers() {
+            function testAPIConnection() {
+                console.log('Testing API connection...');
                 fetch(CLOUDFLARE_API_URL, {
                     method: 'POST',
                     headers: {
@@ -539,9 +545,49 @@
                         action: 'get_all_users'
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('API Response Status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('API not responding properly');
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('API Response Data:', data);
                     if (data.success) {
+                        console.log('API is working, loading users...');
+                        loadUsers();
+                    } else {
+                        console.error('API returned error:', data.error);
+                        alert('خطا در اتصال به سرور: ' + (data.error || 'خطای نامشخص'));
+                    }
+                })
+                .catch(error => {
+                    console.error('API Connection Error:', error);
+                    alert('خطا در اتصال به سرور. لطفاً Worker را بررسی کنید.');
+                });
+            }
+            
+            function loadUsers() {
+                console.log('Loading users from:', CLOUDFLARE_API_URL);
+                
+                fetch(CLOUDFLARE_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'get_all_users'
+                    })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        console.log('Users loaded successfully:', data.users);
                         displayUsers(data.users || []);
                     } else {
                         console.error('Error loading users:', data.error);
@@ -549,7 +595,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Fetch error:', error);
                     displayUsers([]);
                 });
             }
@@ -740,6 +786,40 @@
                 });
             }
             
+            function testWorkerAPI() {
+                console.log('=== Testing Worker API ===');
+                console.log('API URL:', CLOUDFLARE_API_URL);
+                
+                // Test 1: Get all users
+                fetch(CLOUDFLARE_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'get_all_users'
+                    })
+                })
+                .then(response => {
+                    console.log('Test 1 - Response Status:', response.status);
+                    console.log('Test 1 - Response Headers:', response.headers);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Test 1 - Response Data:', data);
+                    if (data.success) {
+                        alert('✅ Worker API کار می‌کند!\n\nتعداد کاربران: ' + (data.users ? data.users.length : 0));
+                        loadUsers(); // Refresh the user list
+                    } else {
+                        alert('❌ Worker API خطا دارد:\n' + (data.error || 'خطای نامشخص'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Test 1 - Error:', error);
+                    alert('❌ خطا در اتصال به Worker:\n' + error.message);
+                });
+            }
+            
             window.checkPassword = checkPassword;
             window.loadUsers = loadUsers;
             window.deleteUser = deleteUser;
@@ -748,6 +828,7 @@
             window.removeDietItem = removeDietItem;
             window.loadExistingPlan = loadExistingPlan;
             window.clearAllData = clearAllData;
+            window.testWorkerAPI = testWorkerAPI;
             
             document.getElementById('dietForm').addEventListener('submit', function(e) {
                 e.preventDefault();
