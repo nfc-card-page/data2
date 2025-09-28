@@ -543,8 +543,8 @@
             function loadUsers() {
 
 
-                 var users = await fetch(`${API_URL}?password=${ADMIN_PASSWORD}`);
-                 const result = await response.json();
+                 var users =  fetch(`${API_URL}?password=${ADMIN_PASSWORD}`);
+                 const result =  response.json();
                   if (result.success) {
                   dataList.textContent = JSON.stringify(result.data, null, 2);
                   } else {
